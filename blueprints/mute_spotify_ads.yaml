@@ -1,0 +1,38 @@
+# https://github.com/nosilleg/home-assistant-blueprints/blueprints/mute_spotify_ads.yaml
+#
+# Original source https://community.home-assistant.io/t/blueprint-mute-spotify-free-advertisements/258681
+
+blueprint:
+  name: Mute Spotify advertisements
+  description: Mute volume of smart-speaker when an advertisement is detected.
+  domain: automation
+  input:
+    mediaplayer_entity:
+      name: Media Player
+      selector:
+        entity:
+          domain: media_player
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  platform: state
+  entity_id: !input mediaplayer_entity
+  attribute: media_title
+  to: "Advertisement"
+
+action:
+  - service: media_player.volume_mute
+    entity_id: !input mediaplayer_entity
+    data:
+      is_volume_muted: true
+  - wait_for_trigger:
+      platform: state
+      entity_id: !input mediaplayer_entity
+      attribute: media_title
+      from: "Advertisement"
+  - service: media_player.volume_mute
+    entity_id: !input mediaplayer_entity
+    data:
+      is_volume_muted: false
